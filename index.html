@@ -1,793 +1,563 @@
 <!DOCTYPE html>
+<!--
+  ====================================================================
+  김규리 (Gyuri Kim) 개인 포트폴리오 - index.html
+  ====================================================================
+  구성 순서: 자기소개(Hero) > About > Skills > Research > Projects
+             > Publications > Experience > Contact
+
+  [초보자 안내]
+  - 이 파일 하나만 더블클릭해서 브라우저로 열어도 정상 작동합니다.
+    (css/style.css, js/script.js 를 상대경로로 불러오기 때문에
+     반드시 index.html / css / js 폴더 구조를 그대로 유지해야 합니다.)
+  - 텍스트만 바꾸고 싶다면 아래 HTML 안의 한글 문구만 수정하면 됩니다.
+  - "TODO" 라고 적힌 주석은 나중에 꼭 확인하고 수정해야 하는 부분입니다.
+  ====================================================================
+-->
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SECOM 반도체 공정 품질 모니터링 대시보드</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
-<style>
-  :root {
-    --primary:    #4C6EF5;
-    --secondary:  #F76707;
-    --tertiary:   #12B886;
-    --quaternary: #FAB005;
-    --negative:   #E03131;
-    --neutral:    #868E96;
-    --bg:         #F4F6F9;
-    --card-bg:    #FFFFFF;
-    --text:       #212529;
-    --text-muted: #868E96;
-    --border:     #E4E8EE;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR",
-                 "Malgun Gothic", "맑은 고딕", sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    -webkit-font-smoothing: antialiased;
-  }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gyuri Kim | Materials & Process Research Portfolio</title>
+  <meta name="description" content="김규리 - 화학·나노소재 연구에서 반도체 공정 기술로. 전기화학·나노소재 합성 연구 및 데이터 기반 문제해결 포트폴리오." />
 
-  /* ===== 헤더 ===== */
-  header {
-    background: linear-gradient(135deg, #2B3A67 0%, #4C6EF5 100%);
-    color: #fff;
-    padding: 28px 40px 24px;
-  }
-  header h1 { margin: 0 0 6px; font-size: 24px; letter-spacing: -0.3px; }
-  header .meta { font-size: 13px; opacity: 0.85; }
+  <!-- ============ 폰트: Pretendard(우선) + Noto Sans KR(대체) ============ -->
+  <!-- TODO: 인터넷이 연결되지 않은 환경에서 열면 폰트가 시스템 기본 폰트로 대체됩니다. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet" />
 
-  /* ===== 필터 ===== */
-  .filter-bar {
-    background: var(--card-bg);
-    border-bottom: 1px solid var(--border);
-    padding: 16px 40px;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 20px;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-  .filter-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .filter-label {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-muted);
-    margin-right: 2px;
-    white-space: nowrap;
-  }
-  .chip {
-    border: 1px solid var(--border);
-    background: #fff;
-    color: var(--text-muted);
-    border-radius: 999px;
-    padding: 6px 14px;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    font-family: inherit;
-  }
-  .chip:hover { border-color: var(--primary); color: var(--primary); }
-  .chip.active {
-    background: var(--primary);
-    border-color: var(--primary);
-    color: #fff;
-    font-weight: 500;
-  }
-  .chip.active.bad { background: var(--negative); border-color: var(--negative); }
-  .chip.active.good { background: var(--tertiary); border-color: var(--tertiary); }
-  .reset-btn {
-    margin-left: auto;
-    border: 1px solid var(--border);
-    background: #fff;
-    color: var(--text);
-    border-radius: 8px;
-    padding: 8px 16px;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    font-family: inherit;
-    transition: all 0.15s ease;
-  }
-  .reset-btn:hover { background: #F1F3F5; border-color: var(--neutral); }
+  <link rel="stylesheet" href="css/style.css" />
 
-  .filter-status {
-    padding: 10px 40px 0;
-    font-size: 12px;
-    color: var(--text-muted);
-  }
-  .filter-status strong { color: var(--primary); }
-
-  /* ===== KPI 카드 ===== */
-  .summary-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-    gap: 14px;
-    padding: 16px 40px 22px;
-  }
-  .summary-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 16px 18px;
-    border-left: 4px solid var(--primary);
-  }
-  .summary-card.good { border-left-color: var(--tertiary); }
-  .summary-card.bad  { border-left-color: var(--negative); }
-  .summary-card.warn { border-left-color: var(--quaternary); }
-  .summary-card .label { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
-  .summary-card .value { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
-  .summary-card .value .unit { font-size: 13px; font-weight: 500; color: var(--text-muted); margin-left: 2px; }
-  .summary-card .sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
-
-  /* ===== 차트 그리드 ===== */
-  .chart-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-    gap: 18px;
-    padding: 0 40px;
-  }
-  .chart-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 18px 20px 16px;
-  }
-  .chart-card.wide { grid-column: 1 / -1; }
-  .chart-card h3 {
-    margin: 0 0 2px;
-    font-size: 15px;
-    font-weight: 600;
-  }
-  .chart-card .sub-title {
-    font-size: 12px;
-    color: var(--text-muted);
-    margin-bottom: 12px;
-  }
-  .chart-wrap { position: relative; height: 280px; }
-  .chart-card.wide .chart-wrap { height: 320px; }
-  .chart-caption {
-    margin-top: 12px;
-    padding-top: 10px;
-    border-top: 1px dashed var(--border);
-    font-size: 12.5px;
-    color: var(--text-muted);
-    line-height: 1.6;
-  }
-  .empty-msg {
-    display: none;
-    position: absolute;
-    inset: 0;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    color: var(--text-muted);
-    background: #FAFBFC;
-    border-radius: 8px;
-  }
-  .empty-msg.show { display: flex; }
-
-  /* ===== 하단 섹션 ===== */
-  .bottom-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-    gap: 18px;
-    margin: 26px 40px 48px;
-  }
-  .info-section {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 22px 26px;
-  }
-  .info-section h2 { margin: 0 0 12px; font-size: 16px; }
-  .info-section ul { padding-left: 18px; margin: 0; line-height: 1.85; font-size: 13.5px; }
-  .info-section li { margin-bottom: 6px; }
-  .badge {
-    display: inline-block;
-    font-size: 11px;
-    font-weight: 600;
-    padding: 2px 7px;
-    border-radius: 4px;
-    margin-right: 6px;
-  }
-  .badge.red   { background: #FFF0F0; color: var(--negative); }
-  .badge.amber { background: #FFF8E1; color: #C77700; }
-  .badge.blue  { background: #EEF2FF; color: var(--primary); }
-
-  footer {
-    text-align: center;
-    font-size: 12px;
-    color: var(--text-muted);
-    padding: 0 40px 40px;
-  }
-
-  @media (max-width: 700px) {
-    header, .filter-bar, .summary-row, .chart-grid, .filter-status { padding-left: 16px; padding-right: 16px; }
-    .bottom-grid, footer { margin-left: 16px; margin-right: 16px; padding-left: 0; padding-right: 0; }
-    .reset-btn { margin-left: 0; }
-  }
-</style>
+  <!-- 파비콘 대체용 간단 아이콘 (원 안에 GK) -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23121212'/%3E%3Ctext x='50' y='62' font-size='40' fill='%23d7ff3f' text-anchor='middle' font-family='Arial' font-weight='700'%3EGK%3C/text%3E%3C/svg%3E" />
 </head>
 <body>
 
-<header>
-  <h1>SECOM 반도체 공정 품질 모니터링 대시보드</h1>
-  <div class="meta">
-    데이터 출처: 11cha_secom_cleaned.csv · 전체 25건 · 측정 기간 2026-06-30 08:00 ~ 2026-07-01 13:00
-  </div>
-</header>
+  <!-- 스크롤 진행률 바 (페이지 상단, 스크롤할수록 초록색 바가 채워짐) -->
+  <div class="progress-bar" id="progressBar"></div>
 
-<!-- ===== 필터 영역 ===== -->
-<div class="filter-bar">
-  <div class="filter-group">
-    <span class="filter-label">설비명</span>
-    <div id="equipFilters"></div>
-  </div>
-  <div class="filter-group">
-    <span class="filter-label">판정 결과</span>
-    <div id="resultFilters"></div>
-  </div>
-  <button class="reset-btn" id="resetBtn">🔄 필터 초기화</button>
-</div>
+  <!-- ==================== 상단 네비게이션 ==================== -->
+  <header class="nav" id="nav">
+    <div class="nav-inner container">
+      <a href="#home" class="nav-logo">GYURI<span>.KIM</span></a>
 
-<div class="filter-status" id="filterStatus"></div>
+      <nav class="nav-links" id="navLinks">
+        <a href="#home" class="nav-link">Home</a>
+        <a href="#about" class="nav-link">About</a>
+        <a href="#skills" class="nav-link">Skills</a>
+        <a href="#research" class="nav-link">Research</a>
+        <a href="#projects" class="nav-link">Projects</a>
+        <a href="#publications" class="nav-link">Publications</a>
+        <a href="#experience" class="nav-link">Experience</a>
+        <a href="#contact" class="nav-link nav-cta">Contact</a>
+      </nav>
 
-<!-- ===== KPI 카드 ===== -->
-<section class="summary-row" id="summaryRow"></section>
-
-<!-- ===== 차트 그리드 ===== -->
-<section class="chart-grid">
-
-  <div class="chart-card">
-    <h3>① 설비별 생산 건수</h3>
-    <div class="sub-title">설비명 기준 · 판정 결과 누적 (단위: 건)</div>
-    <div class="chart-wrap">
-      <canvas id="chartEquip"></canvas>
-      <div class="empty-msg" id="empty-chartEquip">선택한 조건에 해당하는 데이터가 없음</div>
+      <!-- 모바일 햄버거 버튼 -->
+      <button class="nav-toggle" id="navToggle" aria-label="메뉴 열기">
+        <span></span><span></span><span></span>
+      </button>
     </div>
-    <div class="chart-caption" id="capEquip"></div>
-  </div>
+  </header>
 
-  <div class="chart-card">
-    <h3>② 판정 결과 구성비</h3>
-    <div class="sub-title">양품 / 불량 비중 (단위: 건, %)</div>
-    <div class="chart-wrap">
-      <canvas id="chartResult"></canvas>
-      <div class="empty-msg" id="empty-chartResult">선택한 조건에 해당하는 데이터가 없음</div>
+  <main>
+    <!-- ==================== 01. 자기소개 (Hero) ==================== -->
+    <section id="home" class="hero">
+      <div class="container hero-inner">
+        <p class="eyebrow reveal">MATERIALS &amp; PROCESS RESEARCH</p>
+
+        <h1 class="hero-title">
+          <span class="hero-line" data-reveal-title>GYURI</span>
+          <span class="hero-line" data-reveal-title>KIM<span class="dot">.</span></span>
+        </h1>
+
+        <p class="hero-sub reveal">
+          화학·나노소재 연구에서 반도체 공정 기술까지,<br class="br-mobile-hide" />
+          <strong>데이터로 원인을 찾고 최적 조건을 도출하는</strong> 연구자 김규리입니다.
+        </p>
+
+        <div class="hero-actions reveal">
+          <a href="#projects" class="btn btn-primary">Research 살펴보기</a>
+          <a href="#contact" class="btn btn-outline">연락하기</a>
+        </div>
+      </div>
+
+      <!-- 정적 텍스트 배너 (움직이지 않음) -->
+      <div class="marquee">
+        <div class="marquee-track">
+          <span>MATERIALS SCIENCE • ELECTROCHEMISTRY • NANOSTRUCTURE SYNTHESIS • PROCESS OPTIMIZATION • SEMICONDUCTOR PROCESS</span>
+        </div>
+      </div>
+
+      <!-- 통계 카운터 영역 (숫자는 js/script.js 에서 0부터 애니메이션으로 증가) -->
+      <div class="container">
+        <div class="stats reveal">
+          <div class="stat-item">
+            <p class="stat-num" data-count="6" data-suffix="+">0</p>
+            <p class="stat-label">Research Projects</p>
+          </div>
+          <div class="stat-item">
+            <p class="stat-num" data-count="10" data-suffix="+">0</p>
+            <p class="stat-label">Analysis Techniques</p>
+          </div>
+          <div class="stat-item">
+            <p class="stat-num" data-count="4.24" data-decimal="true">0</p>
+            <p class="stat-label">Graduate GPA (4.3 만점)</p>
+          </div>
+          <div class="stat-item">
+            <p class="stat-num" data-count="2" data-nocommas="true">0</p>
+            <p class="stat-label">Publications (Journal + Thesis)</p>
+          </div>
+        </div>
+      </div>
+
+      <a href="#about" class="scroll-cue" aria-label="아래로 스크롤">
+        <span></span>
+      </a>
+    </section>
+
+    <!-- ==================== 02. About ==================== -->
+    <section id="about" class="section">
+      <div class="container">
+        <p class="section-num reveal">01</p>
+        <h2 class="section-title reveal">About</h2>
+
+        <div class="about-grid">
+          <!-- 왼쪽: 프로필 모노그램 + 핵심 정보 -->
+          <div class="about-side reveal">
+            <!-- TODO: 실제 프로필 사진이 있다면 아래 .avatar div를
+                 <img src="assets/profile.jpg" alt="Gyuri Kim" /> 로 교체하세요. -->
+            <div class="avatar">
+              <span>GK</span>
+            </div>
+
+            <ul class="facts">
+              <li><span>Base</span><strong>Seoul, Korea</strong></li>
+              <li><span>Education</span><strong>이화여자대학교 화학·나노과학 석사 졸업 (2026.02)</strong></li>
+              <li><span>Focus</span><strong>소재 합성 · 전기화학 · 공정 최적화</strong></li>
+              <li><span>Target</span><strong>반도체 공정 / 양산기술 엔지니어</strong></li>
+              <li><span>Languages</span><strong>TOEIC 900 · Speaking AL</strong></li>
+            </ul>
+          </div>
+
+          <!-- 오른쪽: 소개 텍스트 -->
+          <div class="about-main reveal">
+            <p class="about-lead">
+              실패한 실험도 원인을 알려주는 데이터라고 생각합니다.
+            </p>
+            <p>
+              이화여자대학교 화학·나노과학과에서 학사부터 석사까지 나노소재 합성과
+              전기화학 촉매 연구를 수행해왔습니다. 원하는 형태의 나노시트를 얻지 못했던
+              문제를 수십 편의 논문 분석과 조건 재설계로 해결한 경험처럼, 결과가 나오지
+              않을 때도 데이터에서 원인을 찾고 가설을 수정하며 끝까지 검증하는 태도를
+              연구의 기본 원칙으로 삼고 있습니다.
+            </p>
+            <p>
+              석사 과정 동안에는 학과 공용 XRD 장비 운영, 연구실 안전관리, 실험 조교
+              업무를 병행하며 예약 체계와 관리 매뉴얼을 새로 구축하는 등 기존 프로세스의
+              비효율을 개선하는 데도 관심을 가져왔습니다. 최근에는 반도체 산업 직무교육과
+              공정 실습을 통해 소재 연구 경험을 반도체 공정 기술 분야로 확장하고 있으며,
+              물리전자공학·집적회로소자모델 학습을 통해 소자 동작 원리와 공정 전반에
+              대한 이해를 쌓아가고 있습니다.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 03. Skills ==================== -->
+    <section id="skills" class="section alt">
+      <div class="container">
+        <p class="section-num reveal">02</p>
+        <h2 class="section-title reveal">Skills</h2>
+        <p class="section-desc reveal">
+          소재 합성부터 정밀 분석, 전기화학 평가, 반도체 공정 기초까지 —
+          연구 전 과정에서 직접 쌓아온 역량입니다.
+        </p>
+
+        <div class="skills-grid">
+
+          <!-- 스킬 카드 1 -->
+          <article class="skill-card reveal">
+            <div class="skill-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M9 2v6L4 19a2 2 0 0 0 2 3h12a2 2 0 0 0 2-3l-5-11V2" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8.5 15h7" stroke="currentColor" stroke-width="1.6"/></svg>
+            </div>
+            <h3>Materials Synthesis</h3>
+            <div class="chips">
+              <span>Nanosheet Synthesis</span><span>Bi / Sn(Stanene)</span>
+              <span>MOF Synthesis</span><span>Fe·Sb Doping</span>
+              <span>Single-Atom Catalyst</span><span>Exfoliation (IPA·NMP)</span>
+            </div>
+          </article>
+
+          <!-- 스킬 카드 2 -->
+          <article class="skill-card reveal">
+            <div class="skill-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="2.2" stroke="currentColor" stroke-width="1.6"/><ellipse cx="12" cy="12" rx="9" ry="3.6" stroke="currentColor" stroke-width="1.6"/><ellipse cx="12" cy="12" rx="9" ry="3.6" transform="rotate(60 12 12)" stroke="currentColor" stroke-width="1.6"/><ellipse cx="12" cy="12" rx="9" ry="3.6" transform="rotate(120 12 12)" stroke="currentColor" stroke-width="1.6"/></svg>
+            </div>
+            <h3>Characterization</h3>
+            <div class="chips">
+              <span>XRD</span><span>SEM / SEM-EDS</span><span>TEM</span>
+              <span>XPS</span><span>Raman</span><span>FT-IR</span>
+              <span>ICP-OES</span><span>VESTA</span>
+            </div>
+          </article>
+
+          <!-- 스킬 카드 3 -->
+          <article class="skill-card reveal">
+            <div class="skill-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            </div>
+            <h3>Electrochemical Testing</h3>
+            <div class="chips">
+              <span>CV / LSV / CA</span><span>iR-drop Correction</span>
+              <span>NRR Catalyst Evaluation</span><span>Electrode Design</span>
+              <span>Faradaic Efficiency</span>
+            </div>
+          </article>
+
+          <!-- 스킬 카드 4 -->
+          <article class="skill-card reveal">
+            <div class="skill-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><rect x="6" y="6" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </div>
+            <h3>Semiconductor Process</h3>
+            <div class="chips">
+              <span>8대 공정 이해</span><span>집적회로 소자모델</span>
+              <span>NCS 공정교육</span><span>수율 관리 기초</span>
+              <span>Spotfire 데이터 분석</span>
+            </div>
+          </article>
+
+          <!-- 스킬 카드 5 -->
+          <article class="skill-card reveal">
+            <div class="skill-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M12 3 4 6v6c0 5 3.4 7.9 8 9 4.6-1.1 8-4 8-9V6l-8-3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            </div>
+            <h3>Lab &amp; Equipment Management</h3>
+            <div class="chips">
+              <span>공용 XRD 운영</span><span>예약 체계 설계</span>
+              <span>연구실 안전관리</span><span>신규자 교육</span>
+            </div>
+          </article>
+
+          <!-- 스킬 카드 6 -->
+          <article class="skill-card reveal">
+            <div class="skill-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M4 20c0-3.3 3.6-5 8-5s8 1.7 8 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="1.6"/></svg>
+            </div>
+            <h3>Collaboration</h3>
+            <div class="chips">
+              <span>데이터 기반 문제해결</span><span>팀 협업 체계 구축</span>
+              <span>프로세스 개선</span><span>문서화 &amp; 지식공유</span>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 04. Research ==================== -->
+    <section id="research" class="section">
+      <div class="container">
+        <p class="section-num reveal">03</p>
+        <h2 class="section-title reveal">Research</h2>
+        <p class="section-desc reveal">
+          이화여자대학교 화학·나노과학과 · 지도교수 김인영 교수님 ·
+          전기화학 및 광촉매 시스템의 실험 설계와 공정 최적화를 주제로 연구했습니다.
+        </p>
+
+        <div class="research-tags reveal">
+          <span>Electrocatalysis</span><span>2D Nanomaterials</span>
+          <span>Doping Engineering</span><span>Photocatalysis</span>
+          <span>Single-Atom Catalysts</span><span>Process Optimization</span>
+        </div>
+
+        <!-- 석사학위논문 카드 -->
+        <article class="thesis-card reveal">
+          <p class="thesis-tag">M.S. Thesis · 2025 · Graduated Feb 2026</p>
+          <h3 class="thesis-title">
+            Ultrafast Synthesis of Bi Nanosheets and Chemical Doping Strategy
+            for Enhanced Electrocatalytic Nitrogen Reduction
+          </h3>
+          <p class="thesis-meta">Ewha Womans University · Dept. of Chemistry &amp; Nanoscience · Advisor: Prof. In-Young Kim · M.S. Chemistry &amp; Nanoscience, 2026.02</p>
+          <p class="thesis-abstract">
+            질소환원반응(NRR)용 비스무스 나노시트의 초고속 합성 조건을 확립하고,
+            Fe·Sb 이종원소 도핑을 통해 촉매 성능을 향상시키는 전략을 제안한 연구입니다.
+            합성 온도·반응 시간 최적화로 나노시트 구조 형성 조건을 확립했으며, XRD·XPS·
+            Raman·SEM-EDS·ICP-OES 등 다각적 분석을 통해 도핑 특성을 검증하고, 전극
+            구성과 iR-drop 보정을 포함한 전기화학 시스템을 함께 구축하여 재현 가능한
+            성능 평가 체계를 완성했습니다.
+          </p>
+          <div class="chips">
+            <span>Bi Nanosheet</span><span>Fe·Sb Doping</span>
+            <span>Electrocatalytic NRR</span><span>XRD / XPS / Raman</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ==================== 05. Projects ==================== -->
+    <section id="projects" class="section alt">
+      <div class="container">
+        <p class="section-num reveal">04</p>
+        <h2 class="section-title reveal">Projects</h2>
+        <p class="section-desc reveal">
+          석사 과정 동안 수행한 세부 연구 프로젝트입니다. 합성 조건 최적화부터
+          정밀 분석, 전기화학 성능 평가까지의 전체 사이클을 직접 수행했습니다.
+        </p>
+
+        <div class="projects-grid">
+
+          <!-- Project 01 -->
+          <article class="project-card reveal">
+            <p class="project-index">01</p>
+            <p class="project-period">2024.03 – 2024.12</p>
+            <h3>비스무스(Bi) 나노시트 합성 및 Fe·Sb 도핑 기반<br />전기화학 소재 성능 향상 연구</h3>
+            <ul class="project-list">
+              <li>합성 온도(~8°C)·반응시간(2 min) 최적화로 나노시트 구조 형성 조건 확립, 고온·장시간 조건에서의 입자·불순물 형성 억제</li>
+              <li>Fe, Sb 이종원소 도핑으로 격자 구조 변화 유도 (XRD d-spacing 감소, Raman Eg peak blue-shift로 검증)</li>
+              <li>XPS · SEM-EDS · ICP-OES 다각 분석으로 목표 도핑 농도(~3 at%) 달성 확인</li>
+            </ul>
+            <div class="chips">
+              <span>Nanosheet Synthesis</span><span>Doping</span><span>XRD</span><span>XPS</span><span>SEM-EDS</span>
+            </div>
+          </article>
+
+          <!-- Project 02 -->
+          <article class="project-card reveal">
+            <p class="project-index">02</p>
+            <p class="project-period">2025.01 – 2025.12</p>
+            <h3>전기화학 NRR 시스템 구축 및 공정 안정화</h3>
+            <ul class="project-list">
+              <li>실험 재현성 저하 및 측정 범위 초과 문제를 전극 구성 변경(Pt rod → mesh, glassy carbon → carbon paper)으로 해결</li>
+              <li>ZIR 함수 기반 iR-drop 보정 및 CV 사이클링을 통한 전극 안정화 프로세스 구축</li>
+              <li>시스템·소재 최적화 누적 적용으로 암모니아 수율 약 100%, 패러데이 효율 약 25% 향상</li>
+              <li>레퍼런스 전극 열화로 인한 측정 오류 원인을 규명하고 정기 점검 체계 수립</li>
+            </ul>
+            <div class="chips">
+              <span>Electrochemical Cell Design</span><span>CV/LSV/CA</span><span>iR Compensation</span>
+            </div>
+          </article>
+
+          <!-- Project 03 -->
+          <article class="project-card reveal">
+            <p class="project-index">03</p>
+            <p class="project-period">2024.06 – 2025.08</p>
+            <h3>TiO₂ 광촉매 기반 미세플라스틱 분해 조건 최적화</h3>
+            <ul class="project-list">
+              <li>촉매 농도 및 광량(1021.4 W/m²)을 변수로 폴리에틸렌 미세플라스틱 광분해 실험 설계</li>
+              <li>Mass-loss 법과 FT-IR Carbonyl Index를 통한 분해 정도 정량화 방법 비교·개선</li>
+              <li>SEM 관찰로 표면 손상(균열, 공극) 특성을 확인하고 분석 방법의 한계와 대안을 도출</li>
+            </ul>
+            <div class="chips">
+              <span>Photocatalysis</span><span>TiO₂</span><span>FT-IR</span><span>SEM</span>
+            </div>
+          </article>
+
+          <!-- Project 04 -->
+          <article class="project-card reveal">
+            <p class="project-index">04</p>
+            <p class="project-period">2023.03 – 2024.03</p>
+            <h3>2D Sn Nanosheet(Stanene) 합성 공정 개발 및 성장 메커니즘 분석</h3>
+            <p class="project-objective">
+              Spintronics 응용을 목표로 2차원 Sn(Stanene) 구조 구현을 위한 합성 공정을
+              개발하고 성장 메커니즘을 분석한 프로젝트입니다.
+            </p>
+            <ul class="project-list">
+              <li><strong>Process Development —</strong> 진공 기반 유기용매 공정을 수용액·대기압 공정으로 전환, Capping Agent 제거를 통한 성장 거동 변화 분석</li>
+              <li><strong>Crystal Engineering —</strong> VESTA로 Sn 결정구조를 분석해 Stanene이 형성되는 결정면을 연구하고, TiO₂(BL) 대신 Titanate Nanosheet를 기판으로 사용해 2D 성장 유도</li>
+              <li><strong>Characterization —</strong> TEM 격자 분석을 통해 우세 결정면·배향성·성장 방향 검증 (SEM·XRD 병행)</li>
+              <li><strong>Exfoliation Optimization —</strong> IPA·NMP, Bath/Probe Sonicator 조건을 비교해 최적 용매·방식·시간을 도출하고 박리 수율 향상</li>
+            </ul>
+            <div class="chips">
+              <span>2D Materials</span><span>Stanene</span><span>Crystal Engineering</span><span>TEM</span><span>VESTA</span><span>Exfoliation</span>
+            </div>
+          </article>
+
+          <!-- Project 05 -->
+          <article class="project-card reveal">
+            <p class="project-index">05</p>
+            <p class="project-period">MOF-derived Catalyst</p>
+            <h3>MOF-derived Ag Single-Atom Catalyst</h3>
+            <ul class="project-list">
+              <li>문헌 기반 Ag-MOF를 다양한 합성 조건에서 제조</li>
+              <li>Gas Furnace 열처리를 통해 Ag Single Atom이 분산된 Carbon Nitride 촉매 합성</li>
+              <li>XRD · SEM · FT-IR로 결정 구조 · 표면 형상 · 화학 결합을 분석하고, 합성 조건과 물성 간 상관관계 도출</li>
+            </ul>
+            <div class="chips">
+              <span>MOF Synthesis</span><span>Single-Atom Catalyst</span><span>Heat Treatment</span><span>XRD</span><span>FT-IR</span>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 06. Publications ==================== -->
+    <section id="publications" class="section">
+      <div class="container">
+        <p class="section-num reveal">05</p>
+        <h2 class="section-title reveal">Publications</h2>
+        <p class="section-desc reveal">
+          <!-- TODO: 새 논문이 출판되면 아래 목록 맨 위에 항목을 추가해 주세요. -->
+          학술지 논문, 학위논문 및 대외 발표 실적입니다.
+        </p>
+
+        <ul class="pub-list">
+          <li class="pub-item reveal">
+            <span class="pub-year">2025</span>
+            <div class="pub-body">
+              <p class="pub-title">
+                <a href="https://doi.org/10.1016/j.apsusc.2024.162088" target="_blank" rel="noopener noreferrer">
+                  Enhanced photocatalytic and electrocatalytic properties of IrO₂ nanoparticles
+                  via Cr and Co ion doping: Insights into surface oxygen defect structures
+                </a>
+              </p>
+              <p class="pub-sub">Journal Article · <em>Applied Surface Science</em>, 686, 162088 (2025) · H. Jeon, D. T. Hoang, <strong>G. Kim</strong>, I. Y. Kim, H. Lee, S. Hong · DOI: 10.1016/j.apsusc.2024.162088</p>
+            </div>
+          </li>
+          <li class="pub-item reveal">
+            <span class="pub-year">2025</span>
+            <div class="pub-body">
+              <p class="pub-title">
+                Ultrafast Synthesis of Bi Nanosheets and Chemical Doping Strategy
+                for Enhanced Electrocatalytic Nitrogen Reduction
+              </p>
+              <p class="pub-sub">M.S. Thesis · Gyuri Kim · Ewha Womans University, Dept. of Chemistry &amp; Nanoscience · Advisor: Prof. In-Young Kim</p>
+            </div>
+          </li>
+          <li class="pub-item reveal">
+            <span class="pub-year">2023</span>
+            <div class="pub-body">
+              <p class="pub-title">실험실 창업 결과 포스터 발표대회 본선 진출 (Top 15)</p>
+              <p class="pub-sub">주최: 과학기술정보통신부 · Al₂O₃ 코팅 LLZO 고체전해질 이온전도도 향상 효과 분석 및 시장성 조사</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ==================== 07. Experience ==================== -->
+    <section id="experience" class="section alt">
+      <div class="container">
+        <p class="section-num reveal">06</p>
+        <h2 class="section-title reveal">Experience</h2>
+        <p class="section-desc reveal">연구 외적으로 조직과 프로세스를 만들고 개선해온 경험입니다.</p>
+
+        <div class="timeline">
+
+          <div class="timeline-item reveal">
+            <div class="timeline-period">2026.03 – 2026.05</div>
+            <div class="timeline-body">
+              <h3>반도체 직무교육 (숭실대학교)</h3>
+              <p>반도체 산업 현직자 직무 강의를 통해 산업 전반을 이해하고, 과제 수행을 통해 공정과 직무 교육을 수료했습니다.</p>
+            </div>
+          </div>
+
+          <div class="timeline-item reveal">
+            <div class="timeline-period">2024.03 – 2025.12</div>
+            <div class="timeline-body">
+              <h3>학과 공용 XRD 장비 운영·관리</h3>
+              <p>10개 이상 연구실이 공동 사용하는 XRD 장비의 예약 체계를 연구실 단위로 재설계해 준비·대기 시간을 줄였습니다. 사용 매뉴얼 제작, 신규 사용자 교육, 장비 이상 여부 일일 점검 체계를 직접 구축·운영했습니다.</p>
+            </div>
+          </div>
+
+          <div class="timeline-item reveal">
+            <div class="timeline-period">2025.02 – 2025.07</div>
+            <div class="timeline-body">
+              <h3>일반화학실험 Ⅰ 조교</h3>
+              <p>수업 전 예비실험으로 조건을 사전 검증하고, 불필요한 가열 단계를 제거하는 등 기존 실험 절차를 개선해 안전성과 진행 효율을 높였습니다.</p>
+            </div>
+          </div>
+
+          <div class="timeline-item reveal">
+            <div class="timeline-period">2024.03 – 2025.02</div>
+            <div class="timeline-body">
+              <h3>연구실 안전관리담당자</h3>
+              <p>화학물질 보관 체계를 운영하고 시약 특성에 따른 분리 보관·위험물 안전관리를 수행했습니다. 신규·퇴실 연구원 정보 및 연구과제 관리 시스템 등록·갱신을 담당했습니다.</p>
+            </div>
+          </div>
+
+          <div class="timeline-item reveal">
+            <div class="timeline-period">2023.03 – 2024.03</div>
+            <div class="timeline-body">
+              <h3>공공기술기반 시장연계 창업탐색 지원사업</h3>
+              <p>Al₂O₃ 코팅 LLZO 고체전해질의 이온전도도 향상 효과를 분석하고, 전문가 40명 인터뷰를 통해 전고체전지 소재 기술 동향과 시장성을 조사했습니다.</p>
+            </div>
+          </div>
+
+          <div class="timeline-item reveal">
+            <div class="timeline-period">2023.03 – 2023.12</div>
+            <div class="timeline-body">
+              <h3>반도체 소자 학술 스터디</h3>
+              <p>GaN(질화갈륨) 기반 전력반도체 관련 논문을 팀원들과 함께 스터디하며 넓은 밴드갭·높은 항복전압 등 핵심 특성과 반도체 소자 물성·제조공정 기초를 학습했습니다.</p>
+            </div>
+          </div>
+
+          <div class="timeline-item reveal">
+            <div class="timeline-period">2024.07 / 2025.07</div>
+            <div class="timeline-body">
+              <h3>과학 페스티벌 부스 운영 (2회)</h3>
+              <p>홍보 포스터를 제작하고 광학현미경 체험형 프로그램을 새로 도입해 방문객 참여율을 높였습니다.</p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 수상/장학 -->
+        <div class="awards reveal">
+          <h3 class="awards-title">Awards &amp; Scholarships</h3>
+          <ul>
+            <li><strong>성적우수장학금</strong> — 이화여자대학교, 2024.03–2026.02 (학부 성적 3.5 이상)</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 08. Contact ==================== -->
+    <section id="contact" class="section contact-section">
+      <div class="container">
+        <p class="section-num reveal light">07</p>
+        <h2 class="section-title reveal light">Contact</h2>
+        <p class="section-desc reveal light">
+          연구 협업이나 채용 관련 문의는 언제든 편하게 연락 주세요.
+        </p>
+
+        <div class="contact-grid">
+          <div class="contact-main reveal">
+            <!-- 이메일 클릭 시 메일 클라이언트가 열립니다 (실제 서버 전송 기능은 없음) -->
+            <a href="mailto:ree2703@naver.com" class="contact-link">
+              ree2703@naver.com
+            </a>
+
+            <button class="btn btn-outline btn-copy" id="copyEmailBtn" type="button" data-email="ree2703@naver.com">
+              이메일 주소 복사하기
+            </button>
+          </div>
+
+          <div class="contact-side reveal">
+            <ul class="facts facts-light">
+              <li><span>Location</span><strong>Seoul, Korea</strong></li>
+              <li><span>Affiliation</span><strong>Ewha Womans University</strong></li>
+              <!-- TODO: LinkedIn / GitHub / Notion 등 링크가 있다면 아래에 추가하세요. -->
+              <li><span>Status</span><strong>Open to Opportunities</strong></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ==================== Footer ==================== -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <p>© 2026 Gyuri Kim. All rights reserved.</p>
+      <button class="to-top" id="toTopBtn" type="button" aria-label="맨 위로">↑ Top</button>
     </div>
-    <div class="chart-caption" id="capResult"></div>
-  </div>
+  </footer>
 
-  <div class="chart-card wide">
-    <h3>③ 시간대별 공정 파라미터 추이</h3>
-    <div class="sub-title">측정일시 기준 · 챔버온도(좌축, ℃) / 압력(우축, kPa)</div>
-    <div class="chart-wrap">
-      <canvas id="chartTrend"></canvas>
-      <div class="empty-msg" id="empty-chartTrend">선택한 조건에 해당하는 데이터가 없음</div>
-    </div>
-    <div class="chart-caption" id="capTrend"></div>
-  </div>
-
-  <div class="chart-card">
-    <h3>④ 챔버온도 분포 (히스토그램)</h3>
-    <div class="sub-title">구간 폭 4.2℃ · 전체 데이터 기준 고정 구간 (단위: 건)</div>
-    <div class="chart-wrap">
-      <canvas id="chartHist"></canvas>
-      <div class="empty-msg" id="empty-chartHist">선택한 조건에 해당하는 데이터가 없음</div>
-    </div>
-    <div class="chart-caption" id="capHist"></div>
-  </div>
-
-  <div class="chart-card">
-    <h3>⑤ 설비별 챔버온도 범위</h3>
-    <div class="sub-title">최솟값~최댓값 구간 + 평균 마커 (단위: ℃)</div>
-    <div class="chart-wrap">
-      <canvas id="chartRange"></canvas>
-      <div class="empty-msg" id="empty-chartRange">선택한 조건에 해당하는 데이터가 없음</div>
-    </div>
-    <div class="chart-caption" id="capRange"></div>
-  </div>
-
-  <div class="chart-card wide">
-    <h3>⑥ 챔버온도 × 가스유량 상관관계</h3>
-    <div class="sub-title">양품/불량 색상 구분 · 전체 데이터 상관계수 r = -0.33</div>
-    <div class="chart-wrap">
-      <canvas id="chartScatter"></canvas>
-      <div class="empty-msg" id="empty-chartScatter">선택한 조건에 해당하는 데이터가 없음</div>
-    </div>
-    <div class="chart-caption" id="capScatter"></div>
-  </div>
-
-</section>
-
-<!-- ===== 하단 인사이트 · 각주 ===== -->
-<section class="bottom-grid">
-  <div class="info-section">
-    <h2>📌 주요 시사점</h2>
-    <ul>
-      <li><span class="badge blue">불량 집중</span>불량 3건 중 2건이 <strong>CVD-01</strong>에서 발생함(해당 설비 불량률 33.3%, 전체 평균 12.0%의 약 2.8배). 다만 표본이 3건뿐이라 통계적 결론이 아닌 <strong>우선 점검 대상 선정 근거</strong>로만 활용해야 함.</li>
-      <li><span class="badge amber">이상치</span>LOT1008(CVD-01)의 챔버온도 272.2℃는 IQR 상한 265.6℃를 초과함. 해당 시점 설비 로그를 별도 확인할 필요가 있음.</li>
-      <li><span class="badge blue">상관관계</span>챔버온도와 가스유량은 약한 음의 상관(r=-0.33)을 보임. 관계가 있어 보이나 <strong>인과관계는 별도 검증이 필요함</strong> — 표본 25건으로는 판단 불가임.</li>
-      <li><span class="badge amber">불량 조건</span>불량 3건의 공정시간은 각각 64·61·59초로 전체 평균 58.96초보다 길고, 3건 모두 압력이 95~97kPa 구간에 몰려 있음. 저압·장시간 조합의 위험성을 추가 데이터로 검증할 가치가 있음.</li>
-    </ul>
-  </div>
-
-  <div class="info-section">
-    <h2>⚠️ 데이터 품질 각주</h2>
-    <ul>
-      <li><span class="badge red">평균 대체</span><strong>압력</strong> 컬럼 3건(LOT1004·LOT1012·LOT1023)이 소수점 15자리 동일값 96.364286으로, 원본 결측값을 평균으로 대체한 흔적임. 압력 관련 해석은 신뢰도를 낮춰 볼 필요가 있음.</li>
-      <li><span class="badge red">중복 키</span><strong>LOT1003</strong>이 2행 존재함. 측정일시·측정값은 동일하나 설비명만 CVD-01 / ETCH-01로 불일치함 → 전체 행 중복이 아니라 <code>drop_duplicates()</code>로 잡히지 않음. 본 대시보드는 원본 25행을 그대로 반영함.</li>
-      <li><span class="badge amber">행 누락</span>LOT1006·1009·1010·1015·1021·1026 총 6개 LOT이 결번임(이전 전처리 단계에서 제거된 것으로 추정됨).</li>
-      <li><span class="badge amber">클래스 불균형</span>불량 3건(12.0%)으로 표본이 매우 적음. 설비별 불량률 비교는 <strong>참고 지표</strong>로만 사용해야 함.</li>
-    </ul>
-  </div>
-</section>
-
-<footer>
-  단일 HTML 파일 · Chart.js 4.4.0 (CDN) · 모든 수치는 원본 CSV 25행에서 실시간 집계됨
-</footer>
-
-<script>
-/* =========================================================
-   1. 원본 데이터 (11cha_secom_cleaned.csv 25행 그대로 삽입)
-   컬럼 순서: 공정ID, 측정일시, 설비명, 챔버온도, 압력, 가스유량, 공정시간, 양품여부
-   ========================================================= */
-const RAW = [
-  ["LOT1001","2026-06-30 08:00","ETCH-01",254.0, 99.3,               46.9,66,"양품"],
-  ["LOT1002","2026-06-30 09:00","ETCH-02",252.2,105.1,               43.3,57,"양품"],
-  ["LOT1003","2026-06-30 10:00","CVD-01", 251.9, 90.4,               39.8,57,"양품"],
-  ["LOT1004","2026-06-30 11:00","CVD-02", 246.6, 96.36428571428573,  42.9,51,"양품"],
-  ["LOT1005","2026-06-30 12:00","PVD-01", 250.5, 92.9,               43.4,60,"양품"],
-  ["LOT1007","2026-06-30 14:00","ETCH-02",249.9, 94.7,               47.5,55,"양품"],
-  ["LOT1008","2026-06-30 15:00","CVD-01", 272.2,106.0,               44.4,63,"양품"],
-  ["LOT1011","2026-06-30 18:00","ETCH-01",244.6,103.1,               48.1,63,"양품"],
-  ["LOT1012","2026-06-30 19:00","ETCH-02",248.3, 96.36428571428573,  40.5,64,"불량"],
-  ["LOT1013","2026-06-30 20:00","CVD-01", 241.1, 94.0,               47.4,65,"양품"],
-  ["LOT1014","2026-06-30 21:00","CVD-02", 241.7, 99.6,               47.9,63,"양품"],
-  ["LOT1016","2026-06-30 23:00","ETCH-01",238.6,105.2,               47.7,60,"양품"],
-  ["LOT1017","2026-07-01 00:00","ETCH-02",261.8, 97.4,               42.6,57,"양품"],
-  ["LOT1018","2026-07-01 01:00","CVD-01", 254.0,105.8,               45.8,61,"양품"],
-  ["LOT1019","2026-07-01 02:00","CVD-02", 250.8,104.8,               44.4,58,"양품"],
-  ["LOT1020","2026-07-01 03:00","PVD-01", 260.2, 98.5,               37.0,61,"양품"],
-  ["LOT1022","2026-07-01 05:00","ETCH-02",242.5,107.0,               44.9,53,"양품"],
-  ["LOT1023","2026-07-01 06:00","CVD-01", 250.5, 96.36428571428573,  44.4,61,"불량"],
-  ["LOT1024","2026-07-01 07:00","CVD-02", 252.7,100.0,               47.3,55,"양품"],
-  ["LOT1025","2026-07-01 08:00","PVD-01", 256.3, 95.5,               49.2,54,"양품"],
-  ["LOT1027","2026-07-01 10:00","ETCH-02",250.8, 97.5,               40.3,60,"양품"],
-  ["LOT1028","2026-07-01 11:00","CVD-01", 254.3, 95.4,               46.9,59,"불량"],
-  ["LOT1029","2026-07-01 12:00","CVD-02", 243.7, 98.4,               47.4,55,"양품"],
-  ["LOT1030","2026-07-01 13:00","PVD-01", 260.9,112.7,               44.0,59,"양품"],
-  ["LOT1003","2026-06-30 10:00","ETCH-01",251.9, 90.4,               39.8,57,"양품"]
-];
-
-// 배열 → 객체 변환
-const DATA = RAW.map(r => ({
-  lot: r[0], ts: r[1], equip: r[2],
-  temp: r[3], press: r[4], gas: r[5], time: r[6], result: r[7]
-}));
-
-/* =========================================================
-   2. 상수 및 유틸리티
-   ========================================================= */
-const COLORS = {
-  primary:'#4C6EF5', secondary:'#F76707', tertiary:'#12B886',
-  quaternary:'#FAB005', negative:'#E03131', neutral:'#868E96'
-};
-// 설비 순서 고정 (필터링해도 축 순서가 흔들리지 않게 함)
-const EQUIPS  = ["ETCH-01","ETCH-02","CVD-01","CVD-02","PVD-01"];
-const RESULTS = ["양품","불량"];
-const EQUIP_COLORS = [COLORS.primary, COLORS.secondary, COLORS.tertiary, COLORS.quaternary, COLORS.neutral];
-
-// 히스토그램 구간은 전체 데이터 기준으로 고정 → 필터 변경 시 막대 위치가 흔들리지 않음
-const HIST_BINS = 8;
-const TEMP_MIN = Math.min(...DATA.map(d => d.temp));   // 238.6
-const TEMP_MAX = Math.max(...DATA.map(d => d.temp));   // 272.2
-const BIN_W = (TEMP_MAX - TEMP_MIN) / HIST_BINS;       // 4.2
-
-const fmt  = (n, d = 1) => (n === null || isNaN(n)) ? '-' : Number(n).toFixed(d);
-const pct  = (n, total) => total === 0 ? '0.0' : (n / total * 100).toFixed(1);
-const mean = arr => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null;
-const shortTs = ts => ts.slice(5, 16).replace('-', '/');   // "06/30 08:00"
-
-/* =========================================================
-   3. 필터 상태 관리
-   ========================================================= */
-let filterEquip  = new Set(EQUIPS);
-let filterResult = new Set(RESULTS);
-
-function getFiltered() {
-  return DATA.filter(d => filterEquip.has(d.equip) && filterResult.has(d.result));
-}
-
-// 필터 칩 UI 생성
-function buildChips(containerId, items, stateSet, colorClassFn) {
-  const box = document.getElementById(containerId);
-  box.innerHTML = '';
-  items.forEach(item => {
-    const btn = document.createElement('button');
-    btn.className = 'chip active' + (colorClassFn ? ' ' + colorClassFn(item) : '');
-    btn.textContent = item;
-    btn.onclick = () => {
-      if (stateSet.has(item)) {
-        // 마지막 하나까지 해제되면 빈 화면이 되므로 최소 1개는 유지함
-        if (stateSet.size > 1) stateSet.delete(item);
-      } else {
-        stateSet.add(item);
-      }
-      btn.classList.toggle('active', stateSet.has(item));
-      render();
-    };
-    box.appendChild(btn);
-  });
-}
-
-function resetFilters() {
-  filterEquip  = new Set(EQUIPS);
-  filterResult = new Set(RESULTS);
-  buildChips('equipFilters',  EQUIPS,  filterEquip);
-  buildChips('resultFilters', RESULTS, filterResult, v => v === '양품' ? 'good' : 'bad');
-  render();
-}
-
-/* =========================================================
-   4. 공통 툴팁 콜백 (항목명 · 건수 · 비율)
-   ========================================================= */
-function countTooltip(totalFn) {
-  return {
-    callbacks: {
-      label: ctx => {
-        const v = ctx.parsed.y !== undefined ? ctx.parsed.y : ctx.parsed;
-        const total = totalFn();
-        return `${ctx.dataset.label || ctx.label}: ${v}건 (${pct(v, total)}%)`;
-      },
-      afterLabel: ctx => `전체 대비 비율 기준: ${totalFn()}건`
-    }
-  };
-}
-
-/* =========================================================
-   5. 차트 초기화
-   ========================================================= */
-Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", "Malgun Gothic", sans-serif';
-Chart.defaults.font.size = 12;
-Chart.defaults.color = '#495057';
-
-const charts = {};
-
-// ① 설비별 건수 (누적 막대)
-charts.equip = new Chart(document.getElementById('chartEquip'), {
-  type: 'bar',
-  data: {
-    labels: EQUIPS,
-    datasets: [
-      { label: '양품', data: [], backgroundColor: COLORS.tertiary, stack: 's' },
-      { label: '불량', data: [], backgroundColor: COLORS.negative, stack: 's' }
-    ]
-  },
-  options: {
-    responsive: true, maintainAspectRatio: false,
-    plugins: {
-      legend: { position: 'top', labels: { boxWidth: 12, usePointStyle: true, pointStyle: 'rect' } },
-      tooltip: {
-        callbacks: {
-          title: items => `설비: ${items[0].label}`,
-          label: ctx => {
-            const v = ctx.parsed.y;
-            const equipTotal = charts.equip.data.datasets
-              .reduce((s, ds) => s + (ds.data[ctx.dataIndex] || 0), 0);
-            return `${ctx.dataset.label}: ${v}건 (설비 내 ${pct(v, equipTotal)}%)`;
-          },
-          footer: items => {
-            const i = items[0].dataIndex;
-            const equipTotal = charts.equip.data.datasets.reduce((s, ds) => s + (ds.data[i] || 0), 0);
-            const grand = getFiltered().length;
-            return `설비 합계 ${equipTotal}건 · 전체 대비 ${pct(equipTotal, grand)}%`;
-          }
-        }
-      }
-    },
-    scales: {
-      x: { stacked: true, title: { display: true, text: '설비명' }, grid: { display: false } },
-      y: { stacked: true, beginAtZero: true, title: { display: true, text: '생산 건수 (건)' },
-           ticks: { stepSize: 1, precision: 0 } }
-    }
-  }
-});
-
-// ② 판정 결과 구성비 (도넛)
-charts.result = new Chart(document.getElementById('chartResult'), {
-  type: 'doughnut',
-  data: {
-    labels: RESULTS,
-    datasets: [{ data: [], backgroundColor: [COLORS.tertiary, COLORS.negative], borderWidth: 2, borderColor: '#fff' }]
-  },
-  options: {
-    responsive: true, maintainAspectRatio: false, cutout: '58%',
-    plugins: {
-      legend: { position: 'bottom', labels: { boxWidth: 12, usePointStyle: true, pointStyle: 'circle', padding: 14 } },
-      tooltip: {
-        callbacks: {
-          label: ctx => {
-            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
-            return `${ctx.label}: ${ctx.parsed}건 (${pct(ctx.parsed, total)}%)`;
-          }
-        }
-      }
-    }
-  }
-});
-
-// ③ 시간대별 추이 (이중 Y축 선 그래프)
-charts.trend = new Chart(document.getElementById('chartTrend'), {
-  type: 'line',
-  data: {
-    labels: [],
-    datasets: [
-      { label: '챔버온도 (℃)', data: [], yAxisID: 'y',  borderColor: COLORS.primary,
-        backgroundColor: 'rgba(76,110,245,0.10)', tension: 0.25, fill: true, pointRadius: 4, pointHoverRadius: 6 },
-      { label: '압력 (kPa)',   data: [], yAxisID: 'y1', borderColor: COLORS.secondary,
-        backgroundColor: 'transparent', tension: 0.25, borderDash: [5, 4], pointRadius: 3, pointHoverRadius: 6 }
-    ]
-  },
-  options: {
-    responsive: true, maintainAspectRatio: false,
-    interaction: { mode: 'index', intersect: false },
-    plugins: {
-      legend: { position: 'top', labels: { boxWidth: 12, usePointStyle: true, pointStyle: 'line' } },
-      tooltip: {
-        callbacks: {
-          title: items => {
-            const i = items[0].dataIndex;
-            const row = charts.trend._rows[i];
-            return `${row.ts}  ·  ${row.lot} (${row.equip})`;
-          },
-          label: ctx => {
-            const unit = ctx.datasetIndex === 0 ? '℃' : 'kPa';
-            return `${ctx.dataset.label.split(' ')[0]}: ${fmt(ctx.parsed.y)} ${unit}`;
-          },
-          footer: items => {
-            const row = charts.trend._rows[items[0].dataIndex];
-            const total = getFiltered().length;
-            return `판정: ${row.result} · 가스유량 ${fmt(row.gas)} sccm · 공정시간 ${row.time}초\n(표시 중 ${total}건 중 1건, ${pct(1, total)}%)`;
-          }
-        }
-      }
-    },
-    scales: {
-      x:  { title: { display: true, text: '측정일시 (월/일 시:분)' }, ticks: { maxRotation: 45, minRotation: 45 } },
-      y:  { position: 'left',  title: { display: true, text: '챔버온도 (℃)' }, grid: { color: '#F1F3F5' } },
-      y1: { position: 'right', title: { display: true, text: '압력 (kPa)' }, grid: { drawOnChartArea: false } }
-    }
-  }
-});
-
-// ④ 챔버온도 히스토그램
-charts.hist = new Chart(document.getElementById('chartHist'), {
-  type: 'bar',
-  data: {
-    labels: Array.from({ length: HIST_BINS }, (_, i) =>
-      `${(TEMP_MIN + i * BIN_W).toFixed(1)}~${(TEMP_MIN + (i + 1) * BIN_W).toFixed(1)}`),
-    datasets: [{ label: '건수', data: [], backgroundColor: COLORS.primary, borderRadius: 3 }]
-  },
-  options: {
-    responsive: true, maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        callbacks: {
-          title: items => `챔버온도 구간: ${items[0].label} ℃`,
-          label: ctx => {
-            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
-            return `건수: ${ctx.parsed.y}건 (${pct(ctx.parsed.y, total)}%)`;
-          }
-        }
-      }
-    },
-    scales: {
-      x: { title: { display: true, text: '챔버온도 구간 (℃)' }, ticks: { maxRotation: 60, minRotation: 45, font: { size: 10 } }, grid: { display: false } },
-      y: { beginAtZero: true, title: { display: true, text: '건수 (건)' }, ticks: { stepSize: 1, precision: 0 } }
-    }
-  }
-});
-
-// ⑤ 설비별 챔버온도 범위 (플로팅 바 = 박스플롯 대체) + 평균 마커
-charts.range = new Chart(document.getElementById('chartRange'), {
-  type: 'bar',
-  data: {
-    labels: EQUIPS,
-    datasets: [
-      { label: '최솟값~최댓값 범위', data: [], backgroundColor: 'rgba(76,110,245,0.35)',
-        borderColor: COLORS.primary, borderWidth: 1, borderSkipped: false, borderRadius: 4, order: 2 },
-      { label: '평균', type: 'scatter', data: [], backgroundColor: COLORS.negative,
-        pointRadius: 6, pointStyle: 'rectRot', order: 1 }
-    ]
-  },
-  options: {
-    responsive: true, maintainAspectRatio: false,
-    plugins: {
-      legend: { position: 'top', labels: { boxWidth: 12, usePointStyle: true } },
-      tooltip: {
-        callbacks: {
-          title: items => `설비: ${items[0].label}`,
-          label: ctx => {
-            const s = charts.range._stats[ctx.dataIndex];
-            if (!s) return '데이터 없음';
-            if (ctx.datasetIndex === 1) return `평균: ${fmt(s.avg)} ℃`;
-            const total = getFiltered().length;
-            return [
-              `최솟값: ${fmt(s.min)} ℃ / 최댓값: ${fmt(s.max)} ℃`,
-              `범위 폭: ${fmt(s.max - s.min)} ℃`,
-              `건수: ${s.n}건 (전체 ${total}건 중 ${pct(s.n, total)}%)`
-            ];
-          }
-        }
-      }
-    },
-    scales: {
-      x: { title: { display: true, text: '설비명' }, grid: { display: false } },
-      y: { title: { display: true, text: '챔버온도 (℃)' }, suggestedMin: 235, suggestedMax: 275 }
-    }
-  }
-});
-
-// ⑥ 산점도
-charts.scatter = new Chart(document.getElementById('chartScatter'), {
-  type: 'scatter',
-  data: {
-    datasets: [
-      { label: '양품', data: [], backgroundColor: 'rgba(18,184,134,0.75)',  pointRadius: 6, pointHoverRadius: 9 },
-      { label: '불량', data: [], backgroundColor: 'rgba(224,49,49,0.85)',   pointRadius: 8, pointHoverRadius: 11, pointStyle: 'triangle' }
-    ]
-  },
-  options: {
-    responsive: true, maintainAspectRatio: false,
-    plugins: {
-      legend: { position: 'top', labels: { boxWidth: 12, usePointStyle: true } },
-      tooltip: {
-        callbacks: {
-          title: ctx => `${ctx[0].raw.lot} (${ctx[0].raw.equip})`,
-          label: ctx => [
-            `판정: ${ctx.dataset.label}`,
-            `챔버온도: ${fmt(ctx.parsed.x)} ℃`,
-            `가스유량: ${fmt(ctx.parsed.y)} sccm`
-          ],
-          footer: ctx => {
-            const total = getFiltered().length;
-            const grp = ctx[0].dataset.data.length;
-            return `${ctx[0].dataset.label} ${grp}건 · 표시 중 ${total}건 대비 ${pct(grp, total)}%`;
-          }
-        }
-      }
-    },
-    scales: {
-      x: { title: { display: true, text: '챔버온도 (℃)' } },
-      y: { title: { display: true, text: '가스유량 (sccm)' } }
-    }
-  }
-});
-
-/* =========================================================
-   6. 렌더링 (필터 변경 시 KPI + 전체 차트 동시 갱신)
-   ========================================================= */
-function toggleEmpty(id, isEmpty) {
-  document.getElementById('empty-' + id).classList.toggle('show', isEmpty);
-}
-
-function render() {
-  const rows  = getFiltered();
-  const total = rows.length;
-  const isEmpty = total === 0;
-
-  /* ---- 필터 상태 표시 ---- */
-  document.getElementById('filterStatus').innerHTML =
-    `선택 조건: 설비 <strong>${[...filterEquip].join(', ')}</strong> · 판정 <strong>${[...filterResult].join(', ')}</strong> ` +
-    `→ 전체 25건 중 <strong>${total}건</strong> (${pct(total, 25)}%) 표시 중`;
-
-  /* ---- KPI 카드 ---- */
-  const good = rows.filter(d => d.result === '양품').length;
-  const bad  = rows.filter(d => d.result === '불량').length;
-  const cards = [
-    { cls: '',     label: '전체 건수',    value: total,                          unit: '건',
-      sub: `전체 25건 대비 ${pct(total, 25)}%` },
-    { cls: 'good', label: '양품 건수',    value: good,                           unit: '건',
-      sub: `양품률 ${pct(good, total)}%` },
-    { cls: 'bad',  label: '불량 건수',    value: bad,                            unit: '건',
-      sub: `불량률 ${pct(bad, total)}%` },
-    { cls: 'warn', label: '평균 챔버온도', value: fmt(mean(rows.map(d => d.temp))), unit: '℃',
-      sub: isEmpty ? '-' : `범위 ${fmt(Math.min(...rows.map(d => d.temp)))} ~ ${fmt(Math.max(...rows.map(d => d.temp)))}` },
-    { cls: 'warn', label: '평균 압력',     value: fmt(mean(rows.map(d => d.press)), 2), unit: 'kPa',
-      sub: '⚠ 결측 3건 평균 대체 포함' },
-    { cls: '',     label: '평균 공정시간', value: fmt(mean(rows.map(d => d.time)), 2), unit: '초',
-      sub: `가동 설비 ${new Set(rows.map(d => d.equip)).size}종` }
-  ];
-  document.getElementById('summaryRow').innerHTML = cards.map(c => `
-    <div class="summary-card ${c.cls}">
-      <div class="label">${c.label}</div>
-      <div class="value">${c.value}<span class="unit">${c.unit}</span></div>
-      <div class="sub">${c.sub}</div>
-    </div>`).join('');
-
-  /* ---- ① 설비별 건수 ---- */
-  charts.equip.data.datasets[0].data = EQUIPS.map(e => rows.filter(d => d.equip === e && d.result === '양품').length);
-  charts.equip.data.datasets[1].data = EQUIPS.map(e => rows.filter(d => d.equip === e && d.result === '불량').length);
-  charts.equip.update();
-  toggleEmpty('chartEquip', isEmpty);
-  const topEquip = EQUIPS.map(e => ({ e, n: rows.filter(d => d.equip === e).length }))
-                         .sort((a, b) => b.n - a.n)[0];
-  document.getElementById('capEquip').textContent = isEmpty ? '표시할 데이터가 없음'
-    : `최다 생산 설비는 ${topEquip.e}(${topEquip.n}건, ${pct(topEquip.n, total)}%)임. 불량이 특정 설비에 몰려 있다면 해당 설비의 정비 이력을 우선 점검할 필요가 있음.`;
-
-  /* ---- ② 판정 결과 구성비 ---- */
-  charts.result.data.datasets[0].data = [good, bad];
-  charts.result.update();
-  toggleEmpty('chartResult', isEmpty);
-  document.getElementById('capResult').textContent = isEmpty ? '표시할 데이터가 없음'
-    : `불량률 ${pct(bad, total)}%(${bad}건)임. 불량 표본이 5건 미만이면 비율 변동 폭이 커지므로, 누적 데이터 확보 후 재평가가 필요함.`;
-
-  /* ---- ③ 시간대별 추이 ---- */
-  const sorted = [...rows].sort((a, b) => a.ts.localeCompare(b.ts));
-  charts.trend._rows = sorted;
-  charts.trend.data.labels = sorted.map(d => shortTs(d.ts));
-  charts.trend.data.datasets[0].data = sorted.map(d => d.temp);
-  charts.trend.data.datasets[1].data = sorted.map(d => d.press);
-  charts.trend.update();
-  toggleEmpty('chartTrend', isEmpty);
-  document.getElementById('capTrend').textContent = isEmpty ? '표시할 데이터가 없음'
-    : `${sorted.length}개 시점의 추이임. 챔버온도와 압력이 동시에 급변하는 구간은 설비 상태 변화 신호일 수 있으므로 해당 시각의 알람 로그와 대조할 필요가 있음.`;
-
-  /* ---- ④ 히스토그램 ---- */
-  const bins = new Array(HIST_BINS).fill(0);
-  rows.forEach(d => {
-    let idx = Math.floor((d.temp - TEMP_MIN) / BIN_W);
-    if (idx >= HIST_BINS) idx = HIST_BINS - 1;   // 최댓값을 마지막 구간에 포함시킴
-    if (idx < 0) idx = 0;
-    bins[idx]++;
-  });
-  charts.hist.data.datasets[0].data = bins;
-  charts.hist.update();
-  toggleEmpty('chartHist', isEmpty);
-  const modeIdx = bins.indexOf(Math.max(...bins));
-  document.getElementById('capHist').textContent = isEmpty ? '표시할 데이터가 없음'
-    : `최빈 구간은 ${charts.hist.data.labels[modeIdx]}℃(${bins[modeIdx]}건, ${pct(bins[modeIdx], total)}%)임. 오른쪽 끝 구간(268.0~272.2℃)에 값이 남아 있다면 이상치 LOT1008이 포함된 상태이므로 해석에 주의가 필요함.`;
-
-  /* ---- ⑤ 설비별 온도 범위 ---- */
-  const stats = EQUIPS.map(e => {
-    const t = rows.filter(d => d.equip === e).map(d => d.temp);
-    return t.length ? { min: Math.min(...t), max: Math.max(...t), avg: mean(t), n: t.length } : null;
-  });
-  charts.range._stats = stats;
-  charts.range.data.datasets[0].data = stats.map(s => s ? [s.min, s.max] : null);
-  charts.range.data.datasets[1].data = stats.map((s, i) => s ? { x: i, y: s.avg } : null);
-  charts.range.update();
-  toggleEmpty('chartRange', isEmpty);
-  const widest = stats.map((s, i) => s ? { e: EQUIPS[i], w: s.max - s.min } : null)
-                      .filter(Boolean).sort((a, b) => b.w - a.w)[0];
-  document.getElementById('capRange').textContent = isEmpty ? '표시할 데이터가 없음'
-    : `온도 변동 폭이 가장 큰 설비는 ${widest.e}(${fmt(widest.w)}℃)임. 변동 폭이 큰 설비는 온도 제어 안정성이 낮다는 뜻이므로 PID 파라미터 재조정 검토 대상임.`;
-
-  /* ---- ⑥ 산점도 ---- */
-  charts.scatter.data.datasets[0].data = rows.filter(d => d.result === '양품')
-    .map(d => ({ x: d.temp, y: d.gas, lot: d.lot, equip: d.equip }));
-  charts.scatter.data.datasets[1].data = rows.filter(d => d.result === '불량')
-    .map(d => ({ x: d.temp, y: d.gas, lot: d.lot, equip: d.equip }));
-  charts.scatter.update();
-  toggleEmpty('chartScatter', isEmpty);
-  document.getElementById('capScatter').textContent = isEmpty ? '표시할 데이터가 없음'
-    : `챔버온도가 높을수록 가스유량이 다소 낮아지는 약한 음의 경향(r=-0.33)이 보임. 상관은 인과가 아니므로 공정 조건 변경 전 별도 실험 설계가 필요함.`;
-}
-
-/* =========================================================
-   7. 초기 실행
-   ========================================================= */
-document.getElementById('resetBtn').onclick = resetFilters;
-buildChips('equipFilters',  EQUIPS,  filterEquip);
-buildChips('resultFilters', RESULTS, filterResult, v => v === '양품' ? 'good' : 'bad');
-render();
-</script>
-
+  <script src="js/script.js"></script>
 </body>
 </html>
