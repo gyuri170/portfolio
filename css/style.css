@@ -1,0 +1,671 @@
+/* ====================================================================
+   김규리 (Gyuri Kim) 포트폴리오 - style.css
+   ====================================================================
+   [초보자 안내]
+   - 색상은 전부 아래 :root 안의 변수(--색상이름)로 관리됩니다.
+     색을 바꾸고 싶으면 :root 부분의 값만 수정하면 전체 사이트에 반영됩니다.
+   - 레이아웃은 CSS Grid / Flexbox로 구성했고, 반응형 브레이크포인트는
+     1080px(태블릿) / 640px(모바일) 두 지점입니다. (파일 맨 아래 참고)
+   ==================================================================== */
+
+/* -------------------- 0. 변수 & 리셋 -------------------- */
+:root {
+  /* 레퍼런스 이미지의 블랙 & 라임그린 무드를 참고한 컬러 팔레트 */
+  --black: #121212;
+  --white: #ffffff;
+  --off-white: #f7f7f4;
+  --lime: #d7ff3f;
+  --lime-dark: #b9e01a;
+  --gray-900: #1a1a1a;
+  --gray-600: #6f6f6c;
+  --gray-400: #9a9a95;
+  --gray-200: #e4e4de;
+  --gray-100: #f0f0ec;
+  --line: rgba(18, 18, 18, 0.12);
+  --line-light: rgba(255, 255, 255, 0.16);
+
+  --container-w: 1160px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --ease: cubic-bezier(0.16, 0.84, 0.44, 1);
+  --dur: 0.5s;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  /* Pretendard 우선 적용, 실패 시 Noto Sans KR, 그다음 시스템 폰트 */
+  font-family: "Pretendard Variable", Pretendard, "Noto Sans KR",
+    -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--gray-900);
+  background: var(--white);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+img { max-width: 100%; display: block; }
+a { color: inherit; text-decoration: none; }
+ul { list-style: none; }
+button { font-family: inherit; cursor: pointer; background: none; border: none; }
+svg { width: 22px; height: 22px; }
+
+.container {
+  max-width: var(--container-w);
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+/* -------------------- 스크롤 진행률 바 -------------------- */
+.progress-bar {
+  position: fixed;
+  top: 0; left: 0;
+  height: 3px;
+  width: 0%;
+  background: var(--lime);
+  z-index: 1000;
+  transition: width 0.1s linear;
+}
+
+/* -------------------- 스크롤 reveal 애니메이션 -------------------- */
+/* js/script.js 에서 IntersectionObserver로 .reveal 요소가 화면에
+   들어오면 .is-visible 클래스를 추가해 아래에서 위로 나타나게 합니다. */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+}
+.reveal.is-visible { opacity: 1; transform: translateY(0); }
+
+/* -------------------- 1. 네비게이션 -------------------- */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 900;
+  padding: 22px 0;
+  transition: background var(--dur) var(--ease), padding var(--dur) var(--ease),
+    border-color var(--dur) var(--ease);
+  border-bottom: 1px solid transparent;
+}
+.nav.is-scrolled {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(10px);
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-logo {
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: 0.02em;
+}
+.nav-logo span { color: var(--gray-400); font-weight: 500; }
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.nav-link {
+  position: relative;
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--gray-900);
+  padding: 4px 0;
+}
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0; bottom: -2px;
+  width: 0%;
+  height: 2px;
+  background: var(--black);
+  transition: width 0.35s var(--ease);
+}
+.nav-link:hover::after,
+.nav-link.is-active::after { width: 100%; }
+
+.nav-cta {
+  background: var(--black);
+  color: var(--white);
+  padding: 9px 18px;
+  border-radius: 999px;
+  transition: background var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+.nav-cta::after { display: none; }
+.nav-cta:hover { background: var(--lime); color: var(--black); transform: translateY(-2px); }
+
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  width: 26px;
+}
+.nav-toggle span {
+  height: 2px;
+  background: var(--black);
+  border-radius: 2px;
+  transition: transform 0.3s var(--ease), opacity 0.3s var(--ease);
+}
+
+/* -------------------- 2. Hero (자기소개) -------------------- */
+.hero {
+  position: relative;
+  padding: 190px 0 0;
+  overflow: hidden;
+}
+
+.hero-inner { text-align: left; }
+
+.eyebrow {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--gray-600);
+  padding: 6px 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  margin-bottom: 26px;
+}
+
+.hero-title {
+  font-size: clamp(58px, 12vw, 148px);
+  font-weight: 800;
+  line-height: 0.94;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+.hero-line {
+  display: block;
+  overflow: hidden;
+}
+/* 각 줄(span) 안의 글자가 아래에서 위로 슬라이드하며 등장 */
+.hero-line { position: relative; }
+.hero-title .dot { color: var(--lime); }
+
+.hero-sub {
+  margin-top: 34px;
+  max-width: 620px;
+  font-size: clamp(17px, 2vw, 20px);
+  color: var(--gray-600);
+}
+.hero-sub strong { color: var(--gray-900); font-weight: 700; }
+
+.hero-actions {
+  margin-top: 40px;
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 15px 30px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 15px;
+  transition: transform var(--dur) var(--ease), background var(--dur) var(--ease),
+    color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.btn-primary {
+  background: var(--black);
+  color: var(--white);
+}
+.btn-primary:hover { background: var(--lime); color: var(--black); transform: translateY(-3px); }
+
+.btn-outline {
+  border: 1px solid var(--line);
+  color: var(--gray-900);
+}
+.btn-outline:hover { border-color: var(--black); transform: translateY(-3px); }
+
+/* 정적 텍스트 배너 (모션 없음, 가운데 정렬 고정) */
+.marquee {
+  margin-top: 90px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: var(--black);
+}
+.marquee-track {
+  display: flex;
+  justify-content: center;
+  padding: 0 24px;
+}
+.marquee-track span {
+  text-align: center;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--lime);
+  padding: 16px 0;
+}
+
+/* 통계 카운터 */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  padding: 56px 0 70px;
+}
+.stat-num {
+  font-size: clamp(34px, 4vw, 48px);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.stat-label {
+  margin-top: 6px;
+  font-size: 13.5px;
+  color: var(--gray-600);
+  letter-spacing: 0.02em;
+}
+
+/* 스크롤 유도 아이콘 */
+.scroll-cue {
+  position: absolute;
+  bottom: -8px; left: 50%;
+  transform: translateX(-50%);
+  display: none;
+}
+
+/* -------------------- 3. 공통 섹션 스타일 -------------------- */
+.section { padding: 130px 0; }
+.section.alt { background: var(--off-white); }
+
+.section-num {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gray-400);
+  letter-spacing: 0.1em;
+  margin-bottom: 14px;
+}
+.section-title {
+  font-size: clamp(36px, 5vw, 56px);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin-bottom: 18px;
+}
+.section-desc {
+  max-width: 620px;
+  color: var(--gray-600);
+  font-size: 17px;
+  margin-bottom: 60px;
+}
+.section-desc:last-of-type { margin-bottom: 0; }
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+.chips span {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 13px;
+  border-radius: 999px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  color: var(--gray-900);
+  transition: background 0.3s var(--ease), color 0.3s var(--ease), border-color 0.3s var(--ease);
+}
+.chips span:hover { background: var(--black); color: var(--lime); border-color: var(--black); }
+
+/* -------------------- 4. About -------------------- */
+.about-grid {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 70px;
+}
+
+.avatar {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-md);
+  background: var(--black);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+.avatar span {
+  font-size: 56px;
+  font-weight: 800;
+  color: var(--lime);
+  letter-spacing: -0.02em;
+}
+
+.facts { display: flex; flex-direction: column; gap: 14px; }
+.facts li {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+.facts li span { font-size: 12.5px; color: var(--gray-600); letter-spacing: 0.04em; text-transform: uppercase; }
+.facts li strong { font-size: 15px; font-weight: 600; }
+
+.about-lead {
+  font-size: clamp(22px, 2.6vw, 28px);
+  font-weight: 700;
+  line-height: 1.5;
+  margin-bottom: 26px;
+}
+.about-main p {
+  color: var(--gray-600);
+  font-size: 16px;
+  margin-bottom: 20px;
+  max-width: 640px;
+}
+
+/* -------------------- 5. Skills -------------------- */
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.skill-card {
+  background: var(--white);
+  padding: 38px 32px;
+  transition: background var(--dur) var(--ease);
+}
+.skill-card:hover { background: var(--off-white); }
+.skill-icon {
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--black);
+  margin-bottom: 20px;
+}
+.skill-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+
+/* -------------------- 6. Research -------------------- */
+.research-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 46px;
+}
+.research-tags span {
+  font-size: 13.5px;
+  font-weight: 700;
+  padding: 9px 16px;
+  border-radius: 999px;
+  background: var(--black);
+  color: var(--lime);
+}
+
+.thesis-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 48px;
+  transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+.thesis-card:hover { border-color: var(--black); transform: translateY(-4px); }
+.thesis-tag {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gray-600);
+  letter-spacing: 0.06em;
+  margin-bottom: 14px;
+}
+.thesis-title {
+  font-size: clamp(21px, 2.6vw, 27px);
+  font-weight: 700;
+  line-height: 1.4;
+  margin-bottom: 14px;
+}
+.thesis-meta { font-size: 14px; color: var(--gray-600); margin-bottom: 22px; }
+.thesis-abstract { font-size: 16px; color: var(--gray-600); max-width: 780px; }
+
+/* -------------------- 7. Projects -------------------- */
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+.project-card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 38px;
+  transition: transform var(--dur) var(--ease), border-color var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease);
+}
+.project-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--black);
+  /* 그림자는 최소한으로만 아주 옅게 사용 */
+  box-shadow: 0 10px 24px rgba(18, 18, 18, 0.06);
+}
+.project-index {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--gray-400);
+  margin-bottom: 14px;
+}
+.project-period {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-600);
+  margin-bottom: 10px;
+}
+.project-card h3 {
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.4;
+  margin-bottom: 16px;
+}
+.project-objective {
+  font-size: 14.5px;
+  color: var(--gray-600);
+  margin-bottom: 16px;
+}
+.project-list { display: flex; flex-direction: column; gap: 10px; }
+.project-list li {
+  position: relative;
+  padding-left: 18px;
+  font-size: 14.5px;
+  color: var(--gray-600);
+  line-height: 1.55;
+}
+.project-list li::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 8px;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--lime-dark);
+}
+.project-list li strong { color: var(--gray-900); }
+
+/* -------------------- 8. Publications -------------------- */
+.pub-list { border-top: 1px solid var(--line); }
+.pub-item {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 24px;
+  padding: 30px 0;
+  border-bottom: 1px solid var(--line);
+}
+.pub-year { font-size: 15px; font-weight: 800; color: var(--gray-400); }
+.pub-title { font-size: 17px; font-weight: 700; margin-bottom: 8px; line-height: 1.5; }
+.pub-title a { transition: color 0.3s var(--ease); }
+.pub-title a:hover { color: var(--lime-dark); text-decoration: underline; }
+.pub-sub { font-size: 14px; color: var(--gray-600); }
+
+/* -------------------- 9. Experience (타임라인) -------------------- */
+.timeline {
+  position: relative;
+  padding-left: 28px;
+  border-left: 1px solid var(--line);
+}
+.timeline-item {
+  position: relative;
+  padding-bottom: 46px;
+}
+.timeline-item:last-child { padding-bottom: 0; }
+.timeline-item::before {
+  content: "";
+  position: absolute;
+  left: -33px; top: 6px;
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: var(--black);
+  transition: background var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+.timeline-item:hover::before { background: var(--lime-dark); transform: scale(1.3); }
+
+.timeline-period {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gray-600);
+  letter-spacing: 0.03em;
+  margin-bottom: 8px;
+}
+.timeline-body h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+.timeline-body p { font-size: 15px; color: var(--gray-600); max-width: 720px; }
+
+.awards {
+  margin-top: 70px;
+  padding-top: 46px;
+  border-top: 1px solid var(--line);
+}
+.awards-title { font-size: 15px; font-weight: 700; margin-bottom: 16px; letter-spacing: 0.02em; }
+.awards li { font-size: 15px; color: var(--gray-600); }
+
+/* -------------------- 10. Contact -------------------- */
+.contact-section {
+  background: var(--black);
+  color: var(--white);
+}
+.contact-section .section-desc.light { color: rgba(255,255,255,0.6); }
+.contact-section .section-num.light { color: rgba(255,255,255,0.35); }
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 60px;
+  align-items: end;
+}
+
+.contact-link {
+  display: block;
+  font-size: clamp(28px, 5vw, 52px);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  border-bottom: 2px solid transparent;
+  transition: color 0.3s var(--ease), border-color 0.3s var(--ease);
+}
+.contact-link:hover { color: var(--lime); border-color: var(--lime); }
+.contact-link-sm {
+  font-size: clamp(18px, 2.4vw, 22px);
+  font-weight: 600;
+  color: rgba(255,255,255,0.6);
+  margin-top: 10px;
+}
+.contact-link-sm:hover { color: var(--lime); }
+
+.btn-copy {
+  margin-top: 34px;
+  border-color: var(--line-light);
+  color: var(--white);
+}
+.btn-copy:hover { border-color: var(--lime); color: var(--lime); }
+.btn-copy.is-copied { border-color: var(--lime); color: var(--lime); }
+
+.facts-light li { border-bottom: 1px solid var(--line-light); }
+.facts-light li span { color: rgba(255,255,255,0.5); }
+.facts-light li strong { color: var(--white); }
+
+/* -------------------- 11. Footer -------------------- */
+.footer { background: var(--black); color: rgba(255,255,255,0.6); padding: 26px 0 40px; }
+.footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13.5px;
+  padding-top: 26px;
+  border-top: 1px solid var(--line-light);
+}
+.to-top {
+  color: rgba(255,255,255,0.7);
+  font-weight: 600;
+  font-size: 13.5px;
+  transition: color 0.3s var(--ease), transform 0.3s var(--ease);
+}
+.to-top:hover { color: var(--lime); transform: translateY(-3px); }
+
+/* ====================================================================
+   반응형 (Responsive) — 태블릿(1080px 이하) / 모바일(640px 이하)
+   ==================================================================== */
+@media (max-width: 1080px) {
+  .container { padding: 0 24px; }
+  .hero { padding-top: 150px; }
+  .stats { grid-template-columns: repeat(2, 1fr); row-gap: 40px; }
+  .about-grid { grid-template-columns: 220px 1fr; gap: 44px; }
+  .skills-grid { grid-template-columns: repeat(2, 1fr); }
+  .projects-grid { grid-template-columns: 1fr; }
+  .contact-grid { grid-template-columns: 1fr; align-items: start; gap: 40px; }
+}
+
+@media (max-width: 640px) {
+  .section { padding: 90px 0; }
+  .nav-links {
+    position: fixed;
+    top: 0; right: 0;
+    height: 100vh;
+    width: min(78vw, 320px);
+    background: var(--black);
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 26px;
+    padding: 40px;
+    transform: translateX(100%);
+    transition: transform 0.4s var(--ease);
+  }
+  .nav-links.is-open { transform: translateX(0); }
+  .nav-links .nav-link { color: var(--white); font-size: 18px; }
+  .nav-links .nav-link::after { background: var(--lime); }
+  .nav-cta { background: var(--lime); color: var(--black); }
+
+  .nav-toggle { display: flex; }
+
+  .hero { padding-top: 130px; }
+  .br-mobile-hide { display: none; }
+  .hero-actions { flex-direction: column; align-items: stretch; }
+
+  .stats { grid-template-columns: 1fr 1fr; gap: 30px 16px; padding: 40px 0 50px; }
+
+  .about-grid { grid-template-columns: 1fr; }
+  .avatar { width: 140px; aspect-ratio: 1/1; margin-bottom: 24px; }
+
+  .skills-grid { grid-template-columns: 1fr; }
+
+  .thesis-card { padding: 30px 24px; }
+
+  .pub-item { grid-template-columns: 1fr; gap: 6px; }
+
+  .timeline { padding-left: 22px; }
+  .timeline-item::before { left: -27px; }
+
+  .footer-inner { flex-direction: column; gap: 14px; text-align: center; }
+}
